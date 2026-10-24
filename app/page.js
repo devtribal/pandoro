@@ -8,22 +8,20 @@ function Timer() {
   const [seconds, setSeconds] = useState(50);
   const [minutes, setMinutes] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
-  const incrementMinute = useRef(false);
+  const prevSeconds = useRef(0);
 
   useEffect(() => {
-    let id;
-    if (isRunning) {
-      id = setInterval(() => {
-        setSeconds((prev) => {
-          if (prev+1 === 60) {
-            incrementMinute.current = true;
-            return 0;
-          }
+    if (!isRunning) return;
 
-          return prev+1;
-        });     
-      }, 1000)
-    }
+    const id = setInterval(() => {
+      setSeconds((prev) => {
+        if (prev+1 === 60) {
+          return 0;
+        }
+
+        return prev + 1;
+      });     
+    }, 1000)
 
     return () => {
       clearInterval(id);
@@ -31,18 +29,19 @@ function Timer() {
   }, [isRunning]);
 
   useEffect(() => {
-    if (incrementMinute.current == true) {
-      setMinutes(prev => prev+1);
-    }
+    if (prevSeconds.current === 59 && seconds === 0) {
+      setMinutes(prev => prev + 1);
+    } 
 
-    incrementMinute.current = false;
+    prevSeconds.current = seconds;
   }, [seconds])
 
-  return(
+  return (
     <div className={styles.timer}>
       <h1>{minutes} : {seconds}</h1>
       <button className={styles.utilityButton} onClick={() => {
-        isRunning ? setIsRunning(false): setIsRunning(true)}}>Start</button>
+        isRunning ? setIsRunning(false) : setIsRunning(true)
+      }}>Start</button>
     </div>
   );
 }
